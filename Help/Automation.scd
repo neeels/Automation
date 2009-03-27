@@ -91,21 +91,21 @@ Details:
 
 
  * The snapshot button (marked '[ô]') records an instant value
-   of all sliders at the current time. That's useful, for example, to
-   to set an initial level for time zero for all sliders, for example.
-   You might also have played around with some sliders and don't want
-   to nudge every single one to record the current values.
-   Snapshots work both while stopped, during playback and while
-   recording. Taking a snaphot while recording will just record a single
-   value, regardless; it will not start (or stop) prolonged recording
-   for all sliders.
+   of *all* subscribed sliders at the current time. That's useful, for
+   example, to set an initial level for time zero for all sliders. Or you
+   might have played around with some sliders and don't want to nudge every
+   single one to record the current values.
+   
+   Snapshots work both while stopped, during playback and while recording.
+   Taking a snaphot while recording will not start (or stop) prolonged
+   recording for all sliders, it will just record one value per client.
 
 
- * The save button (marked '^') opens a small window for you to enter
+ * The save button (marked '^') opens a small window, for you to enter
    the name of a directory. The different sliders' stored values will
    be saved in files within that directory, with corresponding
    names. Any directories will be created if missing
-   (TODO: only works on systems with a '/' file separator).
+   (TODO: only works on systems with a '/' path separator).
 
    Files are never overwritten: If files already exist, they are
    renamed to remain as backup.
@@ -148,6 +148,8 @@ Pitfalls:
    b) enable recording ("O" button) and set each GUI element separately.
       Each one of them needs to be *changed* for its recording to catch
       on. So even if it's at the proper level already, wobble it.
+   This allows to keep some sliders out of Automation control even
+   though you automatically docked everything you could find.
 
  * You need to *first* set up a slider's action, and *then* dock it to
    Automation. Not the other way around.
