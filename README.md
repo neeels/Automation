@@ -4,6 +4,9 @@ Record and playback live GUI activity in supercollider audio synth.
 (c) 2009, 2016 Neels Hofmeyr <neels@hofmeyr.de>  
 Published under the GNU General Public License v3.
 
+Contributions by:
+    Iain Mott <mott@escuta.org>
+
 This is a "Quark", a plugin for the supercollider audio synthesizer software.  
 See: https://supercollider.github.io
 

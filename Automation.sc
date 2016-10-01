@@ -29,6 +29,7 @@ Automation {
         <doRecord = false,
         <clients,
         <>gui,
+        <>showLoadSave = true,
         startTime = -1, startOffset = 0,
         semaphore = nil,
         playRoutine,
@@ -109,8 +110,8 @@ Automation {
      * server: The server to use.
      *      If server==nil, then Server.default will be used.
      */
-    *new { |length=180, server=nil|
-        ^super.new.constructor(length, server);
+    *new { |length=180, server=nil, showLoadSave=true|
+        ^super.new.constructor(length, server, showLoadSave);
     }
 
 
@@ -308,11 +309,13 @@ Automation {
 
 
     // internal constructor function
-    constructor { |ilength, iserver|
+    constructor { |ilength, iserver, ishowLoadSave|
         // evaluate input args
 
         server = iserver;
         length = 0.0 + ilength; // make sure it is a float
+
+        showLoadSave = ishowLoadSave;
 
         if (server == nil){
             server = Server.default;

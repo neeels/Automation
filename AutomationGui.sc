@@ -238,10 +238,12 @@ AutomationGui {
             bsave.top = bsnap.top + bsnap.height;
             bsave.height = min(bsave.width, 0.1 * bounds.height);
         };
-        saveBtn = GUI.button.new( win, bsave );
-        saveBtn.states = [[ "^", Color.white, Color.grey ]];
-        saveBtn.action = {
-            this.saveDialog;
+        if(automation.showLoadSave){
+            saveBtn = GUI.button.new( win, bsave );
+            saveBtn.states = [[ "^", Color.white, Color.grey ]];
+            saveBtn.action = {
+                this.saveDialog;
+            };
         };
 
         bload = bounds.copy;
@@ -252,10 +254,12 @@ AutomationGui {
             bload.top = bsave.top + bsave.height;
             bload.height = min(bload.width, 0.1 * bounds.height);
         };
-        loadBtn = GUI.button.new( win, bload );
-        loadBtn.states = [[ "...", Color.white, Color.grey ]];
-        loadBtn.action = {
-            this.loadDialog;
+        if(automation.showLoadSave){
+            loadBtn = GUI.button.new( win, bload );
+            loadBtn.states = [[ "...", Color.white, Color.grey ]];
+            loadBtn.action = {
+                this.loadDialog;
+            };
         };
 
         // number field goes to the end
@@ -277,7 +281,11 @@ AutomationGui {
         // slider goes in-between
         bslider = bounds.copy;
         if (bounds.width > bounds.height) {
-            bslider.left = bload.left + bload.width;
+            if(automation.showLoadSave){
+                bslider.left = bload.left + bload.width;
+            } {
+                bslider.left = bsnap.left + bsnap.width;
+            };
             bslider.width = bnr.left - bslider.left;
         }{
             bslider.top = bload.top + bload.height;
