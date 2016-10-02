@@ -8,11 +8,11 @@
   This class can dock to any GUI element like a slider or a button, or
   anything else that satisfies below criteria, and make it subject to
   Automation's control:
-  
+
   Live changes can be recorded, saved, loaded and replayed.
 
   These are the criteria for a controllable thing, e.g. a GUI element:
-  
+
       controllableThing.value, controllableThing.value_
         getter and setter of a member variable of any kind.
 
@@ -48,7 +48,7 @@ AutomationClient {
         controllableThing = icontrollableThing;
         automation = iautomation;
         name = iname;
-        
+
         values = List.new;
 
         action = controllableThing.action;
@@ -64,7 +64,7 @@ AutomationClient {
 
     seek { |seconds|
         this.stopRecording;
-        
+
         // optimize a rewind
         if (seconds <= 0){
             playCursor = -1;
@@ -95,7 +95,7 @@ AutomationClient {
         };
         // add my name to the dir with the trailing slash, as a filename
         filename = filename ++ name;
-        
+
         // backup existing file?
         if (File.exists(filename)) {
             backupname = filename ++ ".backup_" ++ Date.getDate.stamp;
@@ -181,7 +181,7 @@ AutomationClient {
 
         // move backward?
         while({ if (playCursor > 0) {
-                    (nowtime < values[playCursor][0]) 
+                    (nowtime < values[playCursor][0])
                 }{
                     false
                 };
@@ -321,9 +321,9 @@ AutomationClient {
         // avoid negative values, these only show up when playLatency
         // results in a negative now.
         now = max(automation.now, 0.0);
-        
+
         val = controllableThing.value;
-        
+
         // call the action set by the user
         action.value(view);
 

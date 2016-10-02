@@ -4,7 +4,7 @@
 
    Automation allows to record and playback live changes made to
    other GUI elements in particular, or anything else you wish to
-   setup. 
+   setup.
 
    This is Automation, the main class of the Automation Quark.
    This is what you instantiate to use Automation.
@@ -21,7 +21,7 @@ Automation {
         <>presetDir,
         <>onPlay, <>onStop, <>onSeek,
         <>playLatency = 0.1, <>seekLatency = 0.1,
-        <>doStopOnSeek = false, 
+        <>doStopOnSeek = false,
         <>onEnd,
         <>verbose = true,
         <>server,
@@ -38,7 +38,7 @@ Automation {
 
     /*
      Description of Parameters
-     
+
      * length (Default is 180, that's 3 minutes.)
          This value *only* affects the time slider, nothing else.
          Recorded values are NOT interfered with based on this number,
@@ -100,7 +100,7 @@ Automation {
 
      * gui
          The AutomationGui instance that is connected to this Automation
-         instance, if any.         
+         instance, if any.
      */
 
 
@@ -377,12 +377,12 @@ Automation {
                     playDoReschedule = false;
 
                     // skip to another time position; redo the events queue.
-                    events.clear; 
-                    
+                    events.clear;
+
                     clients.do{|client|
                         visitClient.value(client, now);
                     };
-                    
+
                     nextTimeSlider = -1;
                 };
 
@@ -406,7 +406,7 @@ Automation {
                     if (gui != nil){
                         this.defer{ gui.updateTimeGUI(nowdisp); };
                     };
-                    
+
                     // in that resolution, this is the next time that we
                     // need time slider action.
                     nextTimeSlider = nowdisp + 0.25;
@@ -434,9 +434,9 @@ Automation {
                 };
 
                 // determine the next soonest event
-                if (events.size > 0) { 
+                if (events.size > 0) {
                     nextEventTime = events[0][0];
-                }{  
+                }{
                     nextEventTime = inf;
                 };
 
@@ -460,7 +460,7 @@ Automation {
             // notify status "stopped", and the time of stopping.
             playStatus = false;
             playLastStopped = this.clockTime;
-            
+
             // exit/unlock semaphore
             semaphore.signal;
 
@@ -494,9 +494,9 @@ Automation {
         });
 
         playDoReschedule = true;
-      
+
         playStatus = \playing;
-      
+
         if (gui != nil){
             this.defer{
                 gui.unblock;

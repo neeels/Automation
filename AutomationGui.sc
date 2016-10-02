@@ -4,7 +4,7 @@
 
    Automation allows to record and playback live changes made to
    other GUI elements in particular, or anything else you wish to
-   setup. 
+   setup.
 
    This is AutomationGui, the class of the Automation Quark that provides
    the transport control GUI to interface with the Automation class.
@@ -23,7 +23,7 @@ AutomationGui {
 
     /*
      Description of Parameters
-     
+
      * automation
          The Automation instance this is the GUI of.
 
@@ -31,7 +31,7 @@ AutomationGui {
          The window that the transport control GUI was put in.
          This is either passed into or automatically created
          by the constructor.
-         
+
      */
 
 
@@ -139,7 +139,7 @@ AutomationGui {
             bounds = nil;
         };
 
-        // simple hack. If the window class' name starts with a 
+        // simple hack. If the window class' name starts with a
         // J as in JSCWindow, we don't need to defer GUI signals.
         // see automation.defer().
         if (("" ++ win.class)[0] == $J){
@@ -300,7 +300,7 @@ AutomationGui {
             doUpdateTimeSlider = true;
             automation.defer{this.updateTimeGUI(automation.now)};
         }, \mouseUpAction);
-        
+
         timeNumberBox.addAction({|view, char, modifiers, unicode, keycode|
             if (keycode == 27) {
                 doUpdateTimeNumber = true;
@@ -358,7 +358,7 @@ AutomationGui {
             dwin.front;
         };
     }
-    
+
 
     isMyGuiElement {|guiElement|
         ^ (

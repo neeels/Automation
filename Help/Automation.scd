@@ -3,7 +3,7 @@ Automation is a SuperCollider Quark.
 
 Automation allows to record and playback live changes made to
 other GUI elements in particular, or anything else you wish to
-setup. 
+setup.
 
 This is Automation, the main class of the Automation Quark.
 This is what you instantiate to use Automation.
@@ -50,8 +50,8 @@ Details:
  By "sliders", I also mean buttons and number boxes, and any controllable
  things as defined by AutoClient. It doesn't necessarily have to be GUI
  elements.
- 
- 
+
+
  The Automation Control GUI, explained in detail:
 
 
@@ -95,7 +95,7 @@ Details:
    example, to set an initial level for time zero for all sliders. Or you
    might have played around with some sliders and don't want to nudge every
    single one to record the current values.
-   
+
    Snapshots work both while stopped, during playback and while recording.
    Taking a snaphot while recording will not start (or stop) prolonged
    recording for all sliders, it will just record one value per client.
@@ -163,7 +163,7 @@ Pitfalls:
 // If not done already, select your GUI framework. Run this line:
 GUI.cocoa;
 // or this one:
-GUI.swing; 
+GUI.swing;
 // (I use swing on GNU/Linux)
 
 
@@ -303,7 +303,7 @@ GUI.swing;
 
     // that's all that's needed. Start recording stuff and playing
     // it back. The rest is added detail.
-    
+
 
     // Well, this time I choose to stop playback automatically whenever
     // I seek another position. Note that in the first example playing
