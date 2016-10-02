@@ -30,6 +30,8 @@
   in the GUI element.
 */
 
+/* Detect the type of a value of a GUI element and call appropriate typed file
+ * store/read functions. */
 AutomationKind {
     classvar <>valueKinds = nil;
 
@@ -59,10 +61,13 @@ AutomationKind {
         ^valueKind;
     }
 
-    put {|file, val|
+    putItem {|file, pos, val|
+        "invalid AutomationKind, nothing written".postln;
     }
 
-    get {|file|
+    getItem {|file|
+        "invalid AutomationKind, nothing read".postln;
+        file.seek(0, 2);
         ^nil;
     }
 
@@ -72,12 +77,12 @@ AutomationKind {
 }
 
 AutomationKindFloat : AutomationKind {
-    put {|file, val|
-        file.putDouble(val);
+    putItem {|file, pos, val|
+        file.putItemFloat(pos, val);
     }
 
-    get {|file|
-        ^file.getDouble;
+    getItem {|file|
+        ^file.getItemFloat;
     }
 
     matches {|val|
@@ -92,27 +97,102 @@ AutomationKindInt : AutomationKindFloat {
 }
 
 AutomationKindBoolean : AutomationKind {
-    asFloat {|val|
+    *asFloat {|val|
         if (val){
             ^1.0;
         }
         ^0.0;
     }
 
-    fromFloat {|val|
+    *fromFloat {|val|
         ^val.asBoolean;
     }
 
-    put {|file, val|
-        file.putDouble(this.asFloat(val));
+    putItem {|file, pos, val|
+        file.putItemFloat(pos, AutomationKindBoolean.asFloat(val));
     }
 
-    get {|file|
-        ^this.fromFloat(file.getDouble);
+    getItem {|file|
+        var item = file.getItemFloat;
+        item[1] = AutomationKindBoolean.fromFloat(item[1]);
+        ^item;
     }
 
     matches {|val|
         ^(val.isKindOf(Boolean));
+    }
+}
+
+AutomationFile {
+    var file = nil;
+    classvar fileKinds = nil;
+
+    *registerKinds {
+        fileKinds = List.new;
+        fileKinds.add(AutomationFileDouble);
+    }
+
+    *detect {|file|
+        if (fileKinds == nil) {
+            AutomationFile.registerKinds;
+        };
+        fileKinds.do{|kind|
+            if (kind.matches(file)) {
+                ^kind.new(file);
+            };
+        };
+        "No file type matched".postln;
+        ^nil;
+    }
+
+    *matches {
+        ^false;
+    }
+
+    putItemFloat {|pos, val|
+    }
+
+    getItemFloat {
+        "Unknown file type, nothing read".postln;
+        file.seek(0, 2);
+        ^nil;
+    }
+
+    hasMore {
+        ^(file.pos < file.length);
+    }
+
+    close {
+        file.close;
+    }
+}
+
+/* Store just a stream of position and value doubles. Incapable of values that
+ * cannot be represented by a single floating point number. It raw data without
+ * header or type information, hence it always matches. */
+AutomationFileDouble : AutomationFile {
+    *new {|file|
+        ^super.new.constructor(file);
+    }
+
+    constructor {|ifile|
+        file = ifile;
+    }
+
+    *matches {
+        ^true;
+    }
+
+    putItemFloat {|pos, val|
+        file.putDouble(pos);
+        file.putDouble(val);
+    }
+
+    getItemFloat {
+        var pos, val;
+        pos = file.getDouble;
+        val = file.getDouble;
+        ^[pos, val];
     }
 }
 
@@ -176,7 +256,7 @@ AutomationClient {
     }
 
     save {|dir|
-        var filename, file, backupname, item;
+        var filename, f, file, backupname, item;
         // add a trailing slash.
         // TODO: only works on systems with a '/' file separator.
         filename = dir;
@@ -198,12 +278,15 @@ AutomationClient {
         };
 
         // now write it out.
-        file = File(filename, "wb");
+        f = File(filename, "wb");
+        if (f.isOpen.not) {
+            ("Automation: FAILED to open `" ++ filename ++ "'").postln;
+            ^false;
+        };
+
+        file = AutomationFileDouble(f);
         values.do{|row|
-            // transport position
-            file.putDouble(row[0]);
-            // value at this position
-            valueKind.put(file, row[1]);
+            valueKind.putItem(file, row[0], row[1]);
         };
         file.close;
         if (automation.verbose){
@@ -235,15 +318,20 @@ AutomationClient {
             ^false;
         };
 
+        file = AutomationFile.detect(file);
+
         values.free;
         values = List.new;
 
         // a double is 8 bytes, and there's two doubles per value
         // (time and value).
-        ((file.length div: 8) div: 2).do{
-            pos = file.getDouble;
-            val = valueKind.get(file);
-            values.add([max(0.0,pos), val]);
+        block{|break|
+            {
+                if (file.hasMore.not) {
+                    break.value;
+                };
+                values.add(valueKind.getItem(file));
+            }.loop;
         };
 
         file.close;
