@@ -123,30 +123,49 @@ AutomationKindBoolean : AutomationKind {
     }
 }
 
-AutomationFile {
-    var file = nil;
+AutomationFileBase {
+    var file = nil,
+        <controlledElement = "nil", <controlledValueKind = "nil";
     classvar fileKinds = nil;
 
     *registerKinds {
         fileKinds = List.new;
+        fileKinds.add(AutomationFileText);
         fileKinds.add(AutomationFileDouble);
     }
 
     *detect {|file|
         if (fileKinds == nil) {
-            AutomationFile.registerKinds;
+            AutomationFileBase.registerKinds;
         };
         fileKinds.do{|kind|
             if (kind.matches(file)) {
                 ^kind.new(file);
             };
         };
-        "No file type matched".postln;
         ^nil;
     }
 
     *matches {
         ^false;
+    }
+
+    forElement {|element|
+        if (element == nil) {
+            controlledElement = "nil";
+            controlledValueKind = "nil";
+        }{
+            controlledElement = "" ++ element.class
+                ++ "@" ++ element.absoluteBounds.left
+                ++ "x" ++ element.absoluteBounds.top;
+            controlledValueKind = "" ++ element.value.class;
+        };
+    }
+
+    startPut {
+    }
+
+    startGet {
     }
 
     putItemFloat {|pos, val|
@@ -170,16 +189,16 @@ AutomationFile {
 /* Store just a stream of position and value doubles. Incapable of values that
  * cannot be represented by a single floating point number. It raw data without
  * header or type information, hence it always matches. */
-AutomationFileDouble : AutomationFile {
-    *new {|file|
-        ^super.new.constructor(file);
+AutomationFileDouble : AutomationFileBase {
+    *new {|ifile|
+        ^super.new.constructor(ifile);
     }
 
     constructor {|ifile|
         file = ifile;
     }
 
-    *matches {
+    *matches {|file|
         ^true;
     }
 
@@ -193,6 +212,90 @@ AutomationFileDouble : AutomationFile {
         pos = file.getDouble;
         val = file.getDouble;
         ^[pos, val];
+    }
+}
+
+AutomationFileText : AutomationFileBase {
+    classvar expectFirstLine = "Automation txt v1";
+
+    *new {|ifile|
+        ^super.new.constructor(ifile);
+    }
+
+    constructor{|ifile|
+        file = ifile;
+    }
+
+    *getFirstLine {|file|
+        var firstLine;
+        firstLine = file.getLine(expectFirstLine.size + 10);
+        ^firstLine;
+    }
+
+    *matches {|file|
+        var l, m;
+        l = AutomationFileText.getFirstLine(file);
+        m = false;
+        if (l == expectFirstLine) {
+            m = true;
+        };
+        file.seek(0, 0);
+        ^m;
+    }
+
+    startPut {
+        file.write(expectFirstLine ++ "\n");
+        file.write("K" + controlledElement + controlledValueKind ++ "\n");
+    }
+
+    startGet {
+        if (AutomationFileText.getFirstLine(file) != expectFirstLine) {
+            file.seek(0, 2);
+        };
+    }
+
+    putItemFloat {|pos, val|
+        file.write("f" + pos + val ++ "\n")
+    }
+
+    *parseFloat {|line|
+        ^line.asFloat;
+    }
+
+    parseKind {|tokens|
+        controlledElement = tokens[1];
+        controlledValueKind = tokens[2];
+    }
+
+    getItem {
+        var l, v, pos, valAt;
+        {
+            l = file.getLine(4096);
+            v = l.split($ );
+            case {v[0] == "K"}{
+                this.parseKind(v);
+            }
+            {v[0] == "f"}
+            {
+                pos = AutomationFileText.parseFloat(v[1]);
+                valAt = v[0].size + 1 + v[1].size + 1;
+                ^[pos, AutomationFileText.parseFloat(l.copyToEnd(valAt))];
+            }
+            { true }
+            {
+                Error("Unknown value type:" + v[0]).throw;
+            };
+        }.loop;
+    }
+
+    getItemFloat {
+        var item, val;
+        item = this.getItem;
+        val = item[1];
+        if (val.isKindOf(Float)) {
+            ^item;
+        };
+        Error("Unknown item type:" + val.class).throw;
     }
 }
 
@@ -284,7 +387,9 @@ AutomationClient {
             ^false;
         };
 
-        file = AutomationFileDouble(f);
+        file = AutomationFileText(f);
+        file.forElement(controllableThing);
+        file.startPut;
         values.do{|row|
             valueKind.putItem(file, row[0], row[1]);
         };
@@ -318,33 +423,45 @@ AutomationClient {
             ^false;
         };
 
-        file = AutomationFile.detect(file);
-
-        values.free;
-        values = List.new;
-
-        // a double is 8 bytes, and there's two doubles per value
-        // (time and value).
-        block{|break|
-            {
-                if (file.hasMore.not) {
-                    break.value;
-                };
-                values.add(valueKind.getItem(file));
-            }.loop;
-        };
-
-        file.close;
-
-        if (values.size < 1){
-            ("Automation: NO VALUES in `" ++ filename ++ "'").postln;
+        file = AutomationFileBase.detect(file);
+        if (file == nil) {
+            (""++filename++": unknown file type").postln;
             ^false;
         };
 
-        if (automation.verbose){
-            ("Automation: Loaded" + values.size + "values from `" ++ filename ++ "'").postln;
-        };
-        ^true;
+        try {
+            file.startGet;
+
+            values.free;
+            values = List.new;
+
+            // a double is 8 bytes, and there's two doubles per value
+            // (time and value).
+            block{|break|
+                {
+                    if (file.hasMore.not) {
+                        break.value;
+                    };
+                    values.add(valueKind.getItem(file));
+                }.loop;
+            };
+
+            file.close;
+
+            if (values.size < 1){
+                ("Automation: NO VALUES in `" ++ filename ++ "'").postln;
+                ^false;
+            };
+
+            if (automation.verbose){
+                ("Automation:" + file.class + "loaded"
+                 + values.size + "values from `" ++ filename ++ "'"
+                 + file.controlledElement + file.controlledValueKind).postln
+            };
+            ^true;
+        }{|error|
+            (""+filename++" ("++file.class++"): error: "++error.what).postln;
+        }
     }
 
 
