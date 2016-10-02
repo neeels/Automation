@@ -162,8 +162,10 @@ Automation {
         var classname;
         list.do{|child|
             classname = "" ++ child.class;
-            if (classname.containsi("button") || classname.containsi("slider")
-                || classname.containsi("numberbox")){
+            if (classname.containsi("button")
+                || classname.containsi("slider")
+                || classname.containsi("numberbox")
+                || classname.containsi("checkbox")){
                 this.dock(child);
             // Note: we're not passing a name to dock(), so the control
             // elements will be auto-named by order of appearance. That
