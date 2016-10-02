@@ -277,7 +277,7 @@ GUI.swing;
     // three years ago, for that matter. Let's add automation to it:
 
     // This control GUI is created in its own window, with specific
-    // position and size. The window is accessible in `control.win'.
+    // position and size. The window is accessible in 'control.win'.
     control = Automation().front(bounds: Rect(40, 410, 450, 25));
 
     // All that's left is to hook up the sliders and buttons with
