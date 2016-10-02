@@ -30,6 +30,91 @@
   in the GUI element.
 */
 
+AutomationKind {
+    classvar <>valueKinds = nil;
+
+    *registerKinds{
+        valueKinds = List.new;
+        valueKinds.add(AutomationKindFloat());
+        valueKinds.add(AutomationKindBoolean());
+        valueKinds.add(AutomationKindInt());
+    }
+
+    *get{|val|
+        var valueKind = nil;
+
+        if (valueKinds == nil) {
+            AutomationKind.registerKinds;
+        };
+
+        block{|break|
+            valueKinds.do{|kind|
+                if (kind.matches(val)) {
+                    valueKind = kind;
+                    break.value;
+                };
+            };
+        };
+
+        ^valueKind;
+    }
+
+    put {|file, val|
+    }
+
+    get {|file|
+        ^nil;
+    }
+
+    matches {|val|
+        ^false;
+    }
+}
+
+AutomationKindFloat : AutomationKind {
+    put {|file, val|
+        file.putDouble(val);
+    }
+
+    get {|file|
+        ^file.getDouble;
+    }
+
+    matches {|val|
+        ^(val.isKindOf(Float));
+    }
+}
+
+AutomationKindInt : AutomationKindFloat {
+    matches {|val|
+        ^(val.isKindOf(Integer));
+    }
+}
+
+AutomationKindBoolean : AutomationKind {
+    asFloat {|val|
+        if (val){
+            ^1.0;
+        }
+        ^0.0;
+    }
+
+    fromFloat {|val|
+        ^val.asBoolean;
+    }
+
+    put {|file, val|
+        file.putDouble(this.asFloat(val));
+    }
+
+    get {|file|
+        ^this.fromFloat(file.getDouble);
+    }
+
+    matches {|val|
+        ^(val.isKindOf(Boolean));
+    }
+}
 
 AutomationClient {
     var <>automation = nil,
@@ -39,7 +124,7 @@ AutomationClient {
         values = nil,
         playCursor = -1, recordCursor = -1,
         controllableThing = nil,
-        valueKind = nil;
+        <valueKind = nil;
 
     *new {|controllableThing, automation, name|
         ^super.new.constructor(controllableThing, automation, name);
@@ -52,12 +137,10 @@ AutomationClient {
 
         values = List.new;
 
-        if (controllableThing.value.isKindOf(Boolean)){
-            valueKind = Boolean;
-        }{
-            if (controllableThing.value.isKindOf(Float)){
-                valueKind = Float;
-            };
+        valueKind = AutomationKind.get(controllableThing.value);
+        if (valueKind == nil) {
+            ("Unknown GUI value kind:" + controllableThing.value.class
+             + "for" + controllableThing.class).postln;
         };
 
         action = controllableThing.action;
@@ -92,36 +175,6 @@ AutomationClient {
         ^val;
     }
 
-    valAsFloat {|val|
-        var rval;
-        rval = 0.0;
-        if (valueKind == Float){
-            rval = val;
-        }{
-            if (valueKind == Boolean){
-                if (val){
-                    rval = 1.0;
-                }{
-                    rval = 0.0;
-                };
-            }{
-                // unknown value kind, fallback
-                rval = 0.0 + val.asInt;
-            }
-        }
-        ^rval;
-    }
-
-    valFromFloat {|val|
-        var rval;
-        if (valueKind == Boolean){
-            rval = val.asBoolean;
-        }{
-            rval = val;
-        }
-        ^rval;
-    }
-
     save {|dir|
         var filename, file, backupname, item;
         // add a trailing slash.
@@ -150,8 +203,7 @@ AutomationClient {
             // transport position
             file.putDouble(row[0]);
             // value at this position
-            item = row[1];
-            file.putDouble(this.valAsFloat(item));
+            valueKind.put(file, row[1]);
         };
         file.close;
         if (automation.verbose){
@@ -160,7 +212,7 @@ AutomationClient {
     }
 
     load {|dir|
-        var filename, file;
+        var filename, file, pos, val;
 
         // make sure we're not directly overwriting loaded values.
         this.stopRecording;
@@ -189,7 +241,9 @@ AutomationClient {
         // a double is 8 bytes, and there's two doubles per value
         // (time and value).
         ((file.length div: 8) div: 2).do{
-            values.add([max(0.0,file.getDouble), file.getDouble]);
+            pos = file.getDouble;
+            val = valueKind.get(file);
+            values.add([max(0.0,pos), val]);
         };
 
         file.close;
@@ -197,14 +251,6 @@ AutomationClient {
         if (values.size < 1){
             ("Automation: NO VALUES in `" ++ filename ++ "'").postln;
             ^false;
-        };
-
-        // convert the loaded values if necessary
-        if (valueKind != Float) {
-            ("Converting from" + valueKind + "...").postln;
-            values.do{|row|
-                row[1] = this.valFromFloat(row[1]);
-            };
         };
 
         if (automation.verbose){

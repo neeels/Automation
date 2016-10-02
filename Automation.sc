@@ -637,7 +637,8 @@ Automation {
 
         clients.add(autoClient);
         if (verbose){
-            ("Automation: Added client `" ++ autoClient.name ++ "'").postln;
+            ("Automation: Added client `" ++ autoClient.name ++ "' as "
+             ++ autoClient.valueKind.class).postln;
         };
     }
 
