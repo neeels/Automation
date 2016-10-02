@@ -41,7 +41,32 @@ Quick example:
       Load again and observe that the sliders swap their motion. ;)
 
 
-Details:
+Installation:
+
+ From the default Quarks directory:
+
+(
+ Quarks.install("Automation");
+ thisProcess.platform.recompile;
+)
+
+ If you'd like to use your local git checkout at e.g.'~/git/Automation'
+ instead:
+
+(
+ Quarks.install("~/git/Automation");
+ thisProcess.platform.recompile;
+)
+
+ To remove:
+
+(
+ Quarks.uninstall("Automation");
+ thisProcess.platform.recompile;
+)
+
+
+Usage Details:
 
  You need at least one Automation class instance, where you register sliders
  (etc.) as desired. Every slider (etc.) is registered with a distinct name
@@ -168,13 +193,13 @@ GUI.swing;
 
 
 (
-    // This code launches the simpler test window. It has the control GUI
-    // and the controlled sliders in the same window.
+    // Simple test, all in one window.
+
+    // First, create any window with some sliders...
 
     var win, button, slider, numberBox,
         control;
 
-    // Any window will do...
     win = GUI.window.new("Automation Transport Interface", Rect(40, 400, 450, 130));
 
     slider = GUI.slider.new(win, Rect(25, 35, 25, 90));
@@ -227,7 +252,7 @@ GUI.swing;
 
 (
 
-    // This code launches the larger demo window.
+    // Larger demo
 
     var win,
         controlsize, controlwin, control,
@@ -334,7 +359,7 @@ GUI.swing;
     // Gimmick example: Let's add "our own" transport control button
     // that seeks somewhere random, acting "from outside".
     // I put it in another window to set it apart from the rest.
-    gimmickwin = GUI.window.new("Gmk", Rect(510, 410, 150, 20));
+    gimmickwin = GUI.window.new("Seek Gimmick", Rect(510, 410, 150, 20));
     gimmickbutton = GUI.button.new(gimmickwin, Rect(25, 0, 100, 20));
     gimmickbutton.states = [ ["seek", Color.black, Color.green] ];
     gimmickbutton.action = {
