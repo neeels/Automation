@@ -197,7 +197,7 @@ GUI.swing;
 
     // First, create any window with some sliders...
 
-    var win, button, slider, numberBox,
+    var win, button, slider, numberBox, checkBox,
         control;
 
     win = GUI.window.new("Automation Transport Interface", Rect(40, 400, 450, 130));
@@ -216,6 +216,10 @@ GUI.swing;
     numberBox = GUI.numberBox.new(win, Rect(180, 75, 50, 25));
     numberBox.value = 0;
     numberBox.action = { ("My own numberBox action says:" + numberBox.value).postln };
+
+    checkBox = GUI.checkBox.new(win, Rect(270, 75, 50, 25));
+    checkBox.value = 0;
+    checkBox.action = { ("My own checkBox action says:" + checkBox.value).postln };
 
     win.front;
 
@@ -239,6 +243,7 @@ GUI.swing;
     control.dock(button, "theButton");
     control.dock(slider, "theSlider");
     control.dock(numberBox, "theNumberBox");
+    control.dock(checkBox, "theCheckBox");
 
     win.onClose = {
         // When the window was closed, stop control, but do not update the
@@ -294,6 +299,13 @@ GUI.swing;
         numberBox = GUI.numberBox.new(win, Rect(270, i*25 + 100, 50, 20));
         numberBox.value = 0;
         numberBox.action = { ("My numberBox" + (i + 1) + "says:" + numberBox.value).postln };
+    };
+
+    5.do{|i|
+        var checkBox;
+        checkBox = GUI.checkBox.new(win, Rect(360, i*25 + 100, 50, 20));
+        checkBox.value = 0;
+        checkBox.action = { ("My checkBox" + (i + 1) + "says:" + checkBox.value).postln };
     };
 
     win.front;

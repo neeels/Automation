@@ -38,7 +38,8 @@ AutomationClient {
         <>minTimeStep = 0.01,
         values = nil,
         playCursor = -1, recordCursor = -1,
-        controllableThing = nil;
+        controllableThing = nil,
+        valueKind = nil;
 
     *new {|controllableThing, automation, name|
         ^super.new.constructor(controllableThing, automation, name);
@@ -50,6 +51,14 @@ AutomationClient {
         name = iname;
 
         values = List.new;
+
+        if (controllableThing.value.isKindOf(Boolean)){
+            valueKind = Boolean;
+        }{
+            if (controllableThing.value.isKindOf(Float)){
+                valueKind = Float;
+            };
+        };
 
         action = controllableThing.action;
         controllableThing.action = {|view| this.internalAction(view); };
@@ -83,8 +92,38 @@ AutomationClient {
         ^val;
     }
 
+    valAsFloat {|val|
+        var rval;
+        rval = 0.0;
+        if (valueKind == Float){
+            rval = val;
+        }{
+            if (valueKind == Boolean){
+                if (val){
+                    rval = 1.0;
+                }{
+                    rval = 0.0;
+                };
+            }{
+                // unknown value kind, fallback
+                rval = 0.0 + val.asInt;
+            }
+        }
+        ^rval;
+    }
+
+    valFromFloat {|val|
+        var rval;
+        if (valueKind == Boolean){
+            rval = val.asBoolean;
+        }{
+            rval = val;
+        }
+        ^rval;
+    }
+
     save {|dir|
-        var filename, file, backupname;
+        var filename, file, backupname, item;
         // add a trailing slash.
         // TODO: only works on systems with a '/' file separator.
         filename = dir;
@@ -108,7 +147,11 @@ AutomationClient {
         // now write it out.
         file = File(filename, "wb");
         values.do{|row|
-            row.do{|item| file.putDouble(item); }
+            // transport position
+            file.putDouble(row[0]);
+            // value at this position
+            item = row[1];
+            file.putDouble(this.valAsFloat(item));
         };
         file.close;
         if (automation.verbose){
@@ -150,10 +193,18 @@ AutomationClient {
         };
 
         file.close;
-        
+
         if (values.size < 1){
             ("Automation: NO VALUES in `" ++ filename ++ "'").postln;
             ^false;
+        };
+
+        // convert the loaded values if necessary
+        if (valueKind != Float) {
+            ("Converting from" + valueKind + "...").postln;
+            values.do{|row|
+                row[1] = this.valFromFloat(row[1]);
+            };
         };
 
         if (automation.verbose){
