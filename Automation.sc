@@ -30,6 +30,7 @@ Automation {
         <clients,
         <>gui,
         <>showLoadSave = true,
+        <>minTimeStep = 0.01,
         startTime = -1, startOffset = 0,
         semaphore = nil,
         playRoutine,
@@ -110,8 +111,8 @@ Automation {
      * server: The server to use.
      *      If server==nil, then Server.default will be used.
      */
-    *new { |length=180, server=nil, showLoadSave=true|
-        ^super.new.constructor(length, server, showLoadSave);
+    *new { |length=180, server=nil, showLoadSave=true, minTimeStep=0.01|
+        ^super.new.constructor(length, server, showLoadSave, minTimeStep);
     }
 
 
@@ -309,14 +310,14 @@ Automation {
 
 
     // internal constructor function
-    constructor { |ilength, iserver, ishowLoadSave|
+    constructor { |ilength, iserver, ishowLoadSave, iminTimeStep|
         // evaluate input args
 
         server = iserver;
         length = 0.0 + ilength; // make sure it is a float
 
         showLoadSave = ishowLoadSave;
-
+        minTimeStep = iminTimeStep;
         if (server == nil){
             server = Server.default;
         };

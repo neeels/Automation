@@ -58,7 +58,6 @@ AutomationKind {
                 };
             };
         };
-
         ^valueKind;
     }
 
@@ -365,7 +364,6 @@ AutomationClient {
     var <>automation = nil,
         <>name = nil,
         <>action = nil,
-        <>minTimeStep = 0.01,
         values = nil,
         playCursor = -1, recordCursor = -1,
         controllableThing = nil,
@@ -635,7 +633,7 @@ AutomationClient {
         }{
             // let's see when a new value would count as a separate
             // time step (at least minTimeStep later).
-            cursorTime = values[cursor][0] + minTimeStep;
+            cursorTime = values[cursor][0] + this.automation.minTimeStep;
         };
 
         if (time > cursorTime){
