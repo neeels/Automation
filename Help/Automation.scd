@@ -1,5 +1,5 @@
 Automation is a SuperCollider Quark.
-(c) 2009 Neels J. Hofmeyr <neels@hofmeyr.de>, GNU GPL v3 or later.
+(c) 2009, 2016 Neels J. Hofmeyr <neels@hofmeyr.de>, GNU GPL v3 or later.
 
 Automation allows to record and playback live changes made to
 other GUI elements in particular, or anything else you wish to
