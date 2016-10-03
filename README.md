@@ -15,3 +15,9 @@ with super collider code examples found inline, as usual with supercollider.
 (https://github.com/neeels/Automation/blob/master/Help/Automation.scd)
 
 Enjoy and feel free to contact me if you have any suggestions or questions!
+I would like to know what you're using Automation for: drop me a mail! :)
+
+News:
+* 2016-10-03:
+ * Added support for load/save of checkboxes and text fields,
+ * new default file format is now plain text (human editable).
