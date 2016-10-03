@@ -409,15 +409,17 @@ GUI.swing;
     // close everything if the main window is closed.
     win.onClose = {
         control.gui.win.close;
+        gimmickwin.close;
     };
 
-    control.win.onClose = {
+    control.gui.win.onClose = {
         // When the control window is closed, stop control, but do not
         // update the (closed) GUI to avoid an error:
         control.quit;
         "control is stopped".postln;
         // Also close our gimmick example.
         gimmickwin.close;
+        win.close;
     };
 )
 
