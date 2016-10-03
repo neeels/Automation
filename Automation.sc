@@ -165,7 +165,8 @@ Automation {
             if (classname.containsi("button")
                 || classname.containsi("slider")
                 || classname.containsi("numberbox")
-                || classname.containsi("checkbox")){
+                || classname.containsi("checkbox")
+                || classname.containsi("textfield")){
                 this.dock(child);
             // Note: we're not passing a name to dock(), so the control
             // elements will be auto-named by order of appearance. That

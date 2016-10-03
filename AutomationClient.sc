@@ -40,6 +40,7 @@ AutomationKind {
         valueKinds.add(AutomationKindFloat());
         valueKinds.add(AutomationKindBoolean());
         valueKinds.add(AutomationKindInt());
+        valueKinds.add(AutomationKindString());
     }
 
     *get{|val|
@@ -123,6 +124,21 @@ AutomationKindBoolean : AutomationKind {
     }
 }
 
+AutomationKindString : AutomationKind {
+    putItem {|file, pos, val|
+        file.putItemString(pos, val);
+    }
+
+    getItem {|file|
+        ^file.getItemString;
+    }
+
+    matches {|val|
+        ^(val.isKindOf(String));
+    }
+}
+
+
 AutomationFileBase {
     var file = nil,
         <controlledElement = "nil", <controlledValueKind = "nil";
@@ -169,10 +185,21 @@ AutomationFileBase {
     }
 
     putItemFloat {|pos, val|
+        "Float not implemented for this file type".postln;
     }
 
     getItemFloat {
-        "Unknown file type, nothing read".postln;
+        "Float not implemented for this file type".postln;
+        file.seek(0, 2);
+        ^nil;
+    }
+
+    putItemString {|pos, val|
+        "String not implemented for this file type".postln;
+    }
+
+    getItemString {
+        "String not implemented for this file type".postln;
         file.seek(0, 2);
         ^nil;
     }
@@ -262,6 +289,10 @@ AutomationFileText : AutomationFileBase {
         ^line.asFloat;
     }
 
+    *parseString {|line|
+        ^line;
+    }
+
     parseKind {|tokens|
         controlledElement = tokens[1];
         controlledValueKind = tokens[2];
@@ -281,6 +312,12 @@ AutomationFileText : AutomationFileBase {
                 valAt = v[0].size + 1 + v[1].size + 1;
                 ^[pos, AutomationFileText.parseFloat(l.copyToEnd(valAt))];
             }
+            {v[0] == "s"}
+            {
+                pos = AutomationFileText.parseFloat(v[1]);
+                valAt = v[0].size + 1 + v[1].size + 1;
+                ^[pos, AutomationFileText.parseString(l.copyToEnd(valAt))];
+            }
             { true }
             {
                 Error("Unknown value type:" + v[0]).throw;
@@ -294,9 +331,34 @@ AutomationFileText : AutomationFileBase {
         val = item[1];
         if (val.isKindOf(Float)) {
             ^item;
+        }{
+            if (val.isKindOf(String)) {
+                try {
+                    ^[item[0], val.toFloat];
+                }{|error|
+                    ("cannot parse" + val + "as number").postln;
+                    ^[item[0], 0]
+                };
+            }
         };
         Error("Unknown item type:" + val.class).throw;
     }
+
+    putItemString {|pos, val|
+        file.write("s" + pos + val.replace("\n", "\\n") ++ "\n");
+    }
+
+    getItemString {
+        var item, val;
+        item = this.getItem;
+        val = item[1];
+        if (val.isKindOf(String)) {
+            ^item;
+        }{
+            ^[item[0], ""+val];
+        };
+    }
+
 }
 
 AutomationClient {

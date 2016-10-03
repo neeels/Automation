@@ -197,7 +197,7 @@ GUI.swing;
 
     // First, create any window with some sliders...
 
-    var win, button, slider, numberBox, checkBox,
+    var win, button, slider, numberBox, checkBox, textField,
         control;
 
     win = GUI.window.new("Automation Transport Interface", Rect(40, 400, 450, 130));
@@ -205,7 +205,7 @@ GUI.swing;
     slider = GUI.slider.new(win, Rect(25, 35, 25, 90));
     slider.action = { ("My own slider action says:" + slider.value).postln };
 
-    button = GUI.button.new(win, Rect(90, 70, 50, 25));
+    button = GUI.button.new(win, Rect(90, 35, 50, 25));
     button.states = [
         ["off", Color.white, Color.black],
         ["on", Color.black, Color.white],
@@ -213,13 +213,17 @@ GUI.swing;
     ];
     button.action = { ("My own button action says:" + button.value).postln };
 
-    numberBox = GUI.numberBox.new(win, Rect(180, 75, 50, 25));
+    numberBox = GUI.numberBox.new(win, Rect(180, 35, 50, 25));
     numberBox.value = 0;
     numberBox.action = { ("My own numberBox action says:" + numberBox.value).postln };
 
-    checkBox = GUI.checkBox.new(win, Rect(270, 75, 50, 25));
+    checkBox = GUI.checkBox.new(win, Rect(270, 35, 50, 25));
     checkBox.value = 0;
     checkBox.action = { ("My own checkBox action says:" + checkBox.value).postln };
+
+    textField = GUI.textField.new(win, Rect(90, 70, 100, 25));
+    textField.value = "edit me";
+    textField.action = {|val| ("My own textField action says:" + val).postln };
 
     win.front;
 
@@ -244,6 +248,7 @@ GUI.swing;
     control.dock(slider, "theSlider");
     control.dock(numberBox, "theNumberBox");
     control.dock(checkBox, "theCheckBox");
+    control.dock(textField, "theTextField");
 
     win.onClose = {
         // When the window was closed, stop control, but do not update the
@@ -306,6 +311,13 @@ GUI.swing;
         checkBox = GUI.checkBox.new(win, Rect(360, i*25 + 100, 50, 20));
         checkBox.value = 0;
         checkBox.action = { ("My checkBox" + (i + 1) + "says:" + checkBox.value).postln };
+    };
+
+    3.do{|i|
+        var textField;
+        textField = GUI.textField.new(win, Rect(90, i*25 + 225, 320, 20));
+        textField.value = "edit me and hit Enter";
+        textField.action = { ("My textField" + (i + 1) + "says:" + textField.value).postln };
     };
 
     win.front;
