@@ -301,15 +301,6 @@ AutomationGui {
             automation.defer{this.updateTimeGUI(automation.now)};
         }, \mouseUpAction);
 
-        timeNumberBox.addAction({|view, char, modifiers, unicode, keycode|
-            if (keycode == 27) {
-                doUpdateTimeNumber = true;
-                automation.defer{ this.updateTimeGUI(automation.now) };
-            }{
-                doUpdateTimeNumber = false;
-            };
-        }, \keyDownAction);
-
         timeNumberBox.addAction({
             doUpdateTimeNumber = false;
         }, \mouseDownAction);
