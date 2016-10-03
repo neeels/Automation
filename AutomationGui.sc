@@ -302,7 +302,7 @@ AutomationGui {
         }, \mouseUpAction);
 
         timeNumberBox.addAction({
-            doUpdateTimeNumber = false;
+            doUpdateTimeNumber = doUpdateTimeNumber.not;
         }, \mouseDownAction);
 
 
