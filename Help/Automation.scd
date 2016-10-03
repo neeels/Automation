@@ -197,33 +197,43 @@ GUI.swing;
 
     // First, create any window with some sliders...
 
-    var win, button, slider, numberBox, checkBox, textField,
+    var win, button, slider, numberBox, checkBox, textField, staticText,
         control;
 
-    win = GUI.window.new("Automation Transport Interface", Rect(40, 400, 450, 130));
+    win = GUI.window.new("Automation Transport Interface", Rect(40, 400, 450, 150));
 
-    slider = GUI.slider.new(win, Rect(25, 35, 25, 90));
-    slider.action = { ("My own slider action says:" + slider.value).postln };
+    slider = GUI.slider.new(win, Rect(25, 45, 25, 90));
+    slider.action = {|val| ("My own slider action says:" + val).postln };
 
-    button = GUI.button.new(win, Rect(90, 35, 50, 25));
+    button = GUI.button.new(win, Rect(80, 45, 50, 25));
     button.states = [
         ["off", Color.white, Color.black],
         ["on", Color.black, Color.white],
         ["standby", Color.yellow, Color.gray]
     ];
-    button.action = { ("My own button action says:" + button.value).postln };
+    button.action = {|val| ("My own button action says:" + val).postln };
 
-    numberBox = GUI.numberBox.new(win, Rect(180, 35, 50, 25));
+    numberBox = GUI.numberBox.new(win, Rect(180, 45, 50, 25));
     numberBox.value = 0;
-    numberBox.action = { ("My own numberBox action says:" + numberBox.value).postln };
+    numberBox.action = {|val| ("My own numberBox action says:" + val).postln };
 
-    checkBox = GUI.checkBox.new(win, Rect(270, 35, 50, 25));
+    checkBox = GUI.checkBox.new(win, Rect(240, 45, 25, 25));
     checkBox.value = 0;
-    checkBox.action = { ("My own checkBox action says:" + checkBox.value).postln };
+    checkBox.action = {|val| ("My own checkBox action says:" + val).postln };
 
-    textField = GUI.textField.new(win, Rect(90, 70, 100, 25));
-    textField.value = "edit me";
+    textField = GUI.textField.new(win, Rect(80, 80, 160, 25));
+    textField.value = "edit me and hit 'Enter'";
     textField.action = {|val| ("My own textField action says:" + val).postln };
+
+    staticText = GUI.staticText.new(win, Rect(270, 35, 180, 110));
+    staticText.string =
+        "1. take a snapshot '[ô]'\n"
+        "2. enable rec 'O'\n"
+        "3. start recording '>'\n"
+        "4. adjust things\n"
+        "5. playback from start '<<'\n"
+        "6. save '^'\n"
+        "7. load '...'\n";
 
     win.front;
 
@@ -243,12 +253,15 @@ GUI.swing;
     };
 
     // All that's left is to hook up above slider, button and number box
-    // with our Automation. Let's dock them with specific names:
-    control.dock(button, "theButton");
-    control.dock(slider, "theSlider");
-    control.dock(numberBox, "theNumberBox");
-    control.dock(checkBox, "theCheckBox");
-    control.dock(textField, "theTextField");
+    // with our Automation.
+    // This can be done automatically:
+    control.findAndDock(win.view.children);
+    // ...or manually with specific names for safer save/load filenames:
+    //control.dock(button, "theButton");
+    //control.dock(slider, "theSlider");
+    //control.dock(numberBox, "theNumberBox");
+    //control.dock(checkBox, "theCheckBox");
+    //control.dock(textField, "theTextField");
 
     win.onClose = {
         // When the window was closed, stop control, but do not update the
@@ -278,12 +291,12 @@ GUI.swing;
     3.do{|i|
         var slider;
         slider = GUI.slider.new(win, Rect(5, 25*i + 5, 440, 20));
-        slider.action = { ("My horizontal slider" + (i + 1) + "says:" + slider.value).postln };
+        slider.action = {|val| ("My horizontal slider" + (i + 1) + "says:" + val).postln };
     };
     3.do{|i|
         var slider;
         slider = GUI.slider.new(win, Rect(25*i + 5, 90, 20, 220));
-        slider.action = { ("My vertical slider" + (i + 1) + "says:" + slider.value).postln };
+        slider.action = {|val| ("My vertical slider" + (i + 1) + "says:" + val).postln };
     };
 
     3.do{|x|
@@ -295,7 +308,7 @@ GUI.swing;
                 ["on", Color.black, Color.white],
                 ["standby", Color.yellow, Color.gray]
             ];
-            button.action = { ("My button" + (3*y + x + 1) + "says:" + button.value).postln };
+            button.action = {|val| ("My button" + (3*y + x + 1) + "says:" + val).postln };
         };
     };
 
@@ -303,21 +316,21 @@ GUI.swing;
         var numberBox;
         numberBox = GUI.numberBox.new(win, Rect(270, i*25 + 100, 50, 20));
         numberBox.value = 0;
-        numberBox.action = { ("My numberBox" + (i + 1) + "says:" + numberBox.value).postln };
+        numberBox.action = {|val| ("My numberBox" + (i + 1) + "says:" + val).postln };
     };
 
     5.do{|i|
         var checkBox;
         checkBox = GUI.checkBox.new(win, Rect(360, i*25 + 100, 50, 20));
         checkBox.value = 0;
-        checkBox.action = { ("My checkBox" + (i + 1) + "says:" + checkBox.value).postln };
+        checkBox.action = {|val| ("My checkBox" + (i + 1) + "says:" + val).postln };
     };
 
     3.do{|i|
         var textField;
         textField = GUI.textField.new(win, Rect(90, i*25 + 225, 320, 20));
         textField.value = "edit me and hit Enter";
-        textField.action = { ("My textField" + (i + 1) + "says:" + textField.value).postln };
+        textField.action = {|val| ("My textField" + (i + 1) + "says:" + val).postln };
     };
 
     win.front;
