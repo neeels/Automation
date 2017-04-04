@@ -30,6 +30,7 @@ Automation {
         <clients,
         <>gui,
         <>showLoadSave = true,
+        <>showSnapshot = true,
         <>minTimeStep = 0.01,
         startTime = -1, startOffset = 0,
         semaphore = nil,
@@ -111,8 +112,8 @@ Automation {
      * server: The server to use.
      *      If server==nil, then Server.default will be used.
      */
-    *new { |length=180, server=nil, showLoadSave=true, minTimeStep=0.01|
-        ^super.new.constructor(length, server, showLoadSave, minTimeStep);
+    *new { |length=180, server=nil, showLoadSave=true, showSnapshot=true, minTimeStep=0.01|
+        ^super.new.constructor(length, server, showLoadSave, showSnapshot, minTimeStep);
     }
 
 
@@ -310,13 +311,14 @@ Automation {
 
 
     // internal constructor function
-    constructor { |ilength, iserver, ishowLoadSave, iminTimeStep|
+    constructor { |ilength, iserver, ishowLoadSave, ishowSnapshot, iminTimeStep|
         // evaluate input args
 
         server = iserver;
         length = 0.0 + ilength; // make sure it is a float
 
         showLoadSave = ishowLoadSave;
+        showSnapshot = ishowSnapshot;
         minTimeStep = iminTimeStep;
         if (server == nil){
             server = Server.default;

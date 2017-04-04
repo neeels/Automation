@@ -219,20 +219,25 @@ AutomationGui {
             bsnap.top = brec.top + brec.height;
             bsnap.height = min(bsnap.width, 0.1 * bounds.height);
         };
-        snapshotBtn = GUI.button.new( win, bsnap );
-        snapshotBtn.states = [["[ô]", Color.black, Color.grey],
-                              ["[ô]", Color.white, Color.red]];
-
-        snapshotBtn.action = {
-            automation.snapshot;
-            {
-                snapshotBtn.value = 0;
-            }.defer(0.2);
+        if (automation.showSnapshot){
+            snapshotBtn = GUI.button.new( win, bsnap );
+            snapshotBtn.states = [["[ô]", Color.black, Color.grey],
+                                  ["[ô]", Color.white, Color.red]];
+            snapshotBtn.action = {
+                automation.snapshot;
+                {
+                    snapshotBtn.value = 0;
+                }.defer(0.2);
+            };
         };
 
         bsave = bounds.copy;
         if (bounds.width > bounds.height) {
-            bsave.left = bsnap.left + bsnap.width;
+            if(automation.showSnapshot){
+                bsave.left = bsnap.left + bsnap.width;
+            } {
+                bsave.left = brec.left + brec.width;
+            };
             bsave.width = min(bsave.height, 0.1 * bounds.width);
         }{
             bsave.top = bsnap.top + bsnap.height;
@@ -284,7 +289,11 @@ AutomationGui {
             if(automation.showLoadSave){
                 bslider.left = bload.left + bload.width;
             } {
-                bslider.left = bsnap.left + bsnap.width;
+                if(automation.showSnapshot){
+                    bslider.left = bsnap.left + bsnap.width;
+                } {
+                    bslider.left = brec.left + brec.width;
+                };
             };
             bslider.width = bnr.left - bslider.left;
         }{
