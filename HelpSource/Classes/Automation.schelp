@@ -1,0 +1,234 @@
+TITLE:: Automation
+summary:: Automation allows to record and playback live changes made to other GUI elements in particular, or anything else you wish to setup.
+categories:: GUI
+related:: Tutorials/AutomationIntro, Classes/AutomationGui, Classes/AutomationClient
+
+DESCRIPTION::
+Automation is a SuperCollider Quark to record, save and load GUI element motions.
+(c) 2009,2016 Neels J. Hofmeyr <neels@hofmeyr.de>, GNU GPL v3 or later.
+Contributions by: escuta <http://escuta.org>
+
+To get started, please see link::Tutorials/AutomationIntro##the Automation tutorial::!
+
+This is Automation, the main class of the Automation Quark. This is what you
+instantiate to use Automation. Automation has a number of subscribed
+AutomationClient instances and delegates them, as well as plays back their
+actions. Most GUIs you are already using can be docked to Automation without
+changing any of your old code. Automation provides a control GUI to
+start/stop/record/save/load the Automation.
+
+
+CLASSMETHODS::
+
+METHOD:: new
+
+ARGUMENT:: length
+The initial max value for playing time (default is 180, that's 3 minutes). This
+value *only* affects the time slider, nothing else. Recorded values are NOT
+interfered with based on this number, it simply determines the scale of the
+time slider GUI element.
+
+ARGUMENT:: server
+The server to use. If server==nil, then Server.default will be used. If you
+were ever to run this on a different server from the default server, you have
+to pass the server arg to the Automation constructor. You may then access it
+here.
+
+ARGUMENT:: showLoadSave
+Show or hide the Load and Save buttons on the transport. The default is true.
+
+ARGUMENT:: showSnapshot
+Show or hide the Snapshot button on the transport. The default is true.
+
+ARGUMENT:: minTimeStep
+Time lapse in seconds between recorded GUI updates. The default is 0.01.
+
+returns:: Instance
+
+
+INSTANCEMETHODS::
+
+private:: addClient
+private:: privateStop
+private:: showSnapshot
+private:: showLoadSave
+private:: length
+private:: constructor
+private:: minTimeStep
+private:: presetDir
+private:: gui
+private:: privatePlay
+private:: server
+private:: privateSeek
+private:: defer
+
+METHOD:: findAndDock
+Automatically find dockable GUI elements in a given window, e.g.
+code::
+findAndDock(window.view.children)
+::
+
+METHOD:: dock
+Manual docking of GUI elements, if findAndDock doesn't do what you need.
+ARGUMENT:: guiElement
+The GUI element to dock, like a slider, etc.
+ARGUMENT:: name
+The name to save the element's values as. If name==nil, name will be
+"automatedN", where N is the current number of GUI elements docked.
+
+METHOD:: front
+Open a transport control GUI.
+LIST::
+## If bounds==nil, it will take up the whole window.
+## If win==nil, these bounds give the size of the new window.
+## If both win and bounds are nil, defaults are used.
+::
+ARGUMENT:: win
+If nil, open a new window. Otherwise the given GUI.window is used to show the transport GUI.
+ARGUMENT:: bounds
+A Rect(x,y,w,h) for size and position of the transport.
+
+METHOD:: play
+User callable function to start playback at the current position.
+
+METHOD:: stop
+User callable function that stops playback, staying at the current position.
+
+METHOD:: seek
+User callable function to seek a given position in seconds.  The seeking action
+is instantaneous.
+ARGUMENT:: seconds
+Time positiong in seconds to seek to.
+ARGUMENT:: dostop
+If false, playback (if running) continues at the new position. If true,
+playback is stopped at the new position. If omitted, the value from
+doStopOnSeek will be used, which in turn is false by default.
+
+METHOD:: save
+Save all clients' values to disk, using client names as the filenames in a given directory.
+
+METHOD:: load
+Load as many clients as possible from disk.
+ARGUMENT:: dir
+Directory to load from.
+
+METHOD:: snapshot
+User callable function that records this instant value for each subscribed
+client. For example, this is useful for setting initial values for all GUI
+elements.
+
+METHOD:: onPlay
+User provided callback function called when when play is carried out in
+transport.
+
+METHOD:: onStop
+User provided callback function called when the transport is stopped.
+The current transport time in seconds is passed in as a parameter.
+For example, use this to launch and stop some background action like audio file
+playback and such.  Note, when doStopOnSeek is true, both onStop and onSeek
+will be called for each seek operation.
+
+METHOD:: onSeek
+User provided callback function called when seek is carried out.
+The current transport time in seconds is passed in as a parameter.
+For example, use this to launch and stop some background action like audio file
+playback and such.  Note, when doStopOnSeek is true, both onStop and onSeek
+will be called for each seek operation.
+
+METHOD:: onEnd
+This callback function is called when the time slider hits its
+end boundary.
+The default behaviour is to add 20% of time and continue to run:
+
+code::
+control.onEnd = { control.length = control.length * 1.2; };
+::
+
+But instead, we could also, for example, stop at the end:
+
+code::
+control.onEnd = { control.stop; };
+::
+
+Or wrap back to the start:
+
+code::
+control.onEnd = { control.seek(0); };
+::
+
+METHOD:: seekLatency
+Add headstart given to the onSeek callback, i.e. call onSeek, and carry out the
+actual transport and GUI seek this many seconds later. Useful for audio
+recording that has latency.
+
+METHOD:: playLatency
+Add headstart given to the onPlay callback, i.e. call onPlay, and carry out the
+actual transport and GUI playback this many seconds later. Useful for audio
+recording that has latency.
+
+METHOD:: doStopOnSeek
+If true, the transport is stopped whenever the transport position is modified.
+
+METHOD:: verbose
+If false, all informational posts on the server window are omitted.
+
+METHOD:: now
+returns:: the current position on the time scale.
+
+METHOD:: isMyGuiElement
+ARGUMENT:: guiElement
+Gui element
+returns:: the AutomationGui instance that is connected to this Automation instance, if any.
+
+METHOD:: stopRecording
+Button action to switch off recording.
+
+METHOD:: enableRecording
+The button action that signals readyness for recording. It makes the record button orange.
+
+METHOD:: doRecord
+If true, then the recording button is active (either orange or red).
+
+METHOD:: quit
+rewind and stop.
+
+METHOD:: defer
+Internal: defer a given function only if doDefer is true. Used for sending GUI signals.
+ARGUMENT:: func
+Function to be deferred.
+
+METHOD:: doDefer
+Internal flag to indicate whether GUI actions should be deferred. May be
+necessary for specific GUI implementations.
+
+METHOD:: clients
+Instance variable. A List of AutomationClient instances that are currently docked.
+
+METHOD:: clientStartsRecordingMsg
+Message function called from any AutomationClient as soon as it was first
+modified in recording mode. It makes the record button red.
+
+METHOD:: clockTime
+Used as base for all transport timing.
+returns:: the current real wall clock time
+
+METHOD:: privatePlay
+The core of the play function without the semaphore stuff.  Don't use unless
+within a semaphore.wait ... semaphore.signal block.
+
+METHOD:: privateStop
+The core of the stop function without the semaphore stuff.  It is also called
+from the playRoutine itself.  Don't use unless within a semaphore.wait ...
+semaphore.signal block.
+
+METHOD:: privateSeek
+The core of the seek function without the semaphore stuff.  Don't use unless
+within a semaphore.wait ... semaphore.signal block.
+
+METHOD:: addClient
+private, don't use unless within a semaphore.wait ... semaphore.signal block.
+
+EXAMPLES::
+
+Please refer to link::Tutorials/AutomationIntro##the Automation tutorial::!
+

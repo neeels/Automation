@@ -6,14 +6,9 @@
    other GUI elements in particular, or anything else you wish to
    setup.
 
-   This is Automation, the main class of the Automation Quark.
-   This is what you instantiate to use Automation.
+   Please see the HelpSource/Tutorials/AutomationIntro.schelp and
+   HelpSource/Classes/Automation.schelp files.
 
-   Automation has a number of subscribed AutomationClient
-   instances and delegates them, as well as plays back their actions.
-
-   It can pop up a little transport GUI for user control, or you
-   can fire the same events by calling Automation's functions.
 */
 
 Automation {
@@ -39,102 +34,15 @@ Automation {
         playDoReschedule = true,
         playLastStopped = 0;
 
-    /*
-     Description of Parameters
-
-     * length (Default is 180, that's 3 minutes.)
-         This value *only* affects the time slider, nothing else.
-         Recorded values are NOT interfered with based on this number,
-         it simply determines the scale of the time slider GUI element.
-
-     * presetDir
-         A directory name that the save and load dialogs show by default.
-         If nil, $HOME/automation/ is used.
-
-     * onPlay, onStop, onSeek
-         Callback functions called when these events are carried out.
-         Each get the current transport time in seconds passed in as
-         a parameter.
-         For example, use these callbacks to launch and stop some
-         background action like audio file playback and such.
-         Note, when doStopOnSeek is true, both onStop and onSeek will
-         be called for each seek operation.
-
-     * playLatency, seekLatency
-         These apply to starting playback, and to seeking while playing,
-         respectively. They determine how much headstart the onPlay
-         and onSeek callbacks are given. See its use in this code.
-
-     * doStopOnSeek
-         If true, every seek stops playback. This causes onStop
-         to be called upon a seek during playback.
-
-     * onEnd
-         This callback function is called when the time slider hits its
-         end boundary.
-         The default behaviour is to add 20% to the time slider's max
-         when reaching the end of it, like this:
-           control.onEnd = { control.length = control.length * 1.2; };
-         But instead, we could also, for example, stop at the end:
-           control.onEnd = { control.stop; };
-         Or wrap back to the start:
-           control.onEnd = { control.seek(0); };
-
-     * verbose
-         If false, all informational posts on the server window
-         are omitted.
-
-     * server
-         If you were ever to run this on a different server from
-         the default server, you have to pass the server arg to the
-         Automation constructor. You may then access it here.
-
-     * doDefer
-         If true, all signals to GUI elements are wrapped in defer{}.
-         This is automatically set false if the window class name
-         starts with a `J', as SwingOSC doesn't need deferring.
-
-     * doRecord
-         If true, then the recording button is active (either orange
-         or red).
-
-     * clients
-         A List of AutomationClient instances that are currently docked.
-
-     * gui
-         The AutomationGui instance that is connected to this Automation
-         instance, if any.
-     */
-
-
-    /* This is the constructor.
-     * length: The initial max value for playing time.
-     * server: The server to use.
-     *      If server==nil, then Server.default will be used.
-     */
     *new { |length=180, server=nil, showLoadSave=true, showSnapshot=true, minTimeStep=0.01|
         ^super.new.constructor(length, server, showLoadSave, showSnapshot, minTimeStep);
     }
 
-
-    /* opens a transport control GUI.
-     * win: If nil, opens a new window. Otherwise the
-     *      given GUI.window is used to show the transport GUI.
-     * bounds: A Rect(x,y,w,h) for size and position of the transport
-     *      GUI.
-     *      If bounds==nil, it will take up the whole window.
-     *      If win==nil, these bounds give the size of the new window.
-     *      If both win and bounds are nil, defaults are used.
-     */
     front { |win=nil, bounds=nil|
         AutomationGui(this, win, bounds);
         ^this;
     }
 
-
-    // this is what you call to dock another one of your gui elements
-    // to Automation. If name==nil, name will be "automatedN", where
-    // N is the current number of GUI elements docked.
     dock {|guiElement, name=nil|
         // safeguard the control's own elements
         if ( this.isMyGuiElement(guiElement) ) {
@@ -159,8 +67,6 @@ Automation {
         };
     }
 
-
-    // e.g. findAndDock(window.view.children)
     findAndDock {|list|
         var classname;
         list.do{|child|
@@ -184,8 +90,6 @@ Automation {
         };
     }
 
-
-    // user callable function to start playback at the current position.
     play {
         var waitTime;
         fork{
@@ -210,12 +114,6 @@ Automation {
         };
     }
 
-    // user callable function to seek a given position in seconds.
-    // The seeking action is instantaneous. Playback, if running,
-    // continues at the new position, unless dostop is set true.
-    // dostop should be passed either true or false; if you omit
-    // dostop from your arguments list, the value from the variable
-    // doStopOnSeek will be used, which in turn is false by default.
     seek { |seconds=0.0, dostop=nil|
         fork{
             if (dostop == nil) {
@@ -228,8 +126,6 @@ Automation {
         };
     }
 
-    // user callable function that stops playback, staying at the
-    // current position.
     stop {
         fork{
             semaphore.wait;
@@ -252,10 +148,6 @@ Automation {
         };
     }
 
-
-    // user callable function that records this instant value
-    // for each subscribed client. For example, this is useful
-    // for setting initial values for all GUI elements.
     snapshot {
         var now;
         now = max(0.0, this.now);
@@ -266,9 +158,6 @@ Automation {
         };
     }
 
-
-    // saves all clients' values to disk, using client names as the
-    // filenames in a given directory.
     save{|dir|
         presetDir = dir;
         ("mkdir -p" + dir).systemCmd;
@@ -281,9 +170,6 @@ Automation {
         };
     }
 
-
-
-    // tries to load as many clients as possible from disk.
     load {|dir|
         presetDir = dir;
         if (verbose){
@@ -295,8 +181,6 @@ Automation {
         };
     }
 
-
-    // returns the current position on the time scale.
     now {
         if (startTime < 0){
             // startTime < 0 means we're not playing.
@@ -309,8 +193,6 @@ Automation {
         };
     }
 
-
-    // internal constructor function
     constructor { |ilength, iserver, ishowLoadSave, ishowSnapshot, iminTimeStep|
         // evaluate input args
 
@@ -324,20 +206,13 @@ Automation {
             server = Server.default;
         };
 
-        // set up other variables
 
         clients = List.new;
         semaphore = Semaphore(1);
 
-        // default action when the time slider knob touches the rightmost
-        // end: elongate the range of the slider by 20%, as in "make the
-        // song a little longer". The time knob will skip a sixth to
-        // the left and continue moving slightly slower than before,
-        // but the time number will continue running steadily.
         onEnd = {
             length = length * 1.2; // +20%
         };
-
 
         // this is the bigass routine that takes care of
         // launching and scheduling playback.
@@ -478,8 +353,6 @@ Automation {
 
     } // constructor()
 
-    // defers a given function only if doDefer is true. Used for
-    // sending GUI signals.
     defer { |func|
         if (doDefer){
             func.defer;
@@ -488,13 +361,10 @@ Automation {
         }
     }
 
-    // what's the timing base we use?
     clockTime {
         ^thisThread.seconds;
     }
 
-    // the core of the play function without the semaphore stuff
-    // don't use unless within a semaphore.wait ... semaphore.signal block.
     privatePlay {
         // Let's give the onPlay() function a head start.
         startTime = this.clockTime + playLatency;
@@ -515,9 +385,6 @@ Automation {
         };
     }
 
-    // the core of the stop function without the semaphore stuff.
-    // It is also called from the playRoutine itself.
-    // don't use unless within a semaphore.wait ... semaphore.signal block.
     privateStop {|seekPos|
         startOffset = seekPos;
         startTime = -1;
@@ -538,8 +405,6 @@ Automation {
         };
     }
 
-    // the core of the seek function without the semaphore stuff.
-    // don't use unless within a semaphore.wait ... semaphore.signal block.
     privateSeek {|seconds, dostop|
         startOffset = seconds;
         playDoReschedule = true;
@@ -586,9 +451,6 @@ Automation {
         };
     }
 
-
-    // the button action that signals readyness for recording.
-    // It makes the record button orange.
     enableRecording{
         fork{
             semaphore.wait;
@@ -602,7 +464,6 @@ Automation {
         };
     }
 
-    // the button action to switch off recording.
     stopRecording{
         fork{
             semaphore.wait;
@@ -619,8 +480,6 @@ Automation {
         };
     }
 
-    // message function called from AutomationClient as soon as it was first
-    // modified in recording mode. It makes the record button red.
     clientStartsRecordingMsg {
         if (gui != nil){
             this.defer{
@@ -629,9 +488,6 @@ Automation {
         };
     }
 
-
-    // private,
-    // don't use unless within a semaphore.wait ... semaphore.signal block.
     addClient {|autoClient|
         block{|break|
             clients.do{|client|
@@ -648,7 +504,4 @@ Automation {
              ++ autoClient.valueKind.class).postln;
         };
     }
-
 }
-
-

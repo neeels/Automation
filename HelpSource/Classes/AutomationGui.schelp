@@ -1,0 +1,12 @@
+TITLE:: AutomationGui
+summary:: Class of the Automation Quark that provides the transport control GUI to interface with the Automation class.
+categories:: GUI
+related:: Tutorials/AutomationIntro, Classes/Automation, Classes/AutomationClient
+
+DESCRIPTION::
+Automation is a SuperCollider Quark.
+(c) 2009,2016 Neels J. Hofmeyr <neels@hofmeyr.de>, GNU GPL v3 or later.
+Contributions by: escuta <http://escuta.org>
+
+See the link::Tutorials/Automation##Automation Tutorial::.
+For details of AutomationGui, see the in-code comments in AutomatinGui.sc instead.

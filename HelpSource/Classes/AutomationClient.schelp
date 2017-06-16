@@ -1,0 +1,15 @@
+TITLE:: AutomationClient
+summary:: AutomationClient is part of Automation, a SuperCollider Quark.
+categories:: GUI
+related:: Tutorials/AutomationIntro, Classes/Automation, Classes/AutomationGui
+
+DESCRIPTION::
+AutomationClient is part of Automation, a SuperCollider Quark.
+
+(c) 2009,2016 Neels J. Hofmeyr <neels@hofmeyr.de>, GNU GPL v3 or later.
+Contributions by: escuta <http://escuta.org>
+
+AutomationClient acts as a docking node for the Automation class.
+Please first see link::Classes/Automation::.
+
+For further information, read the in-code comments of the AutomationClient.sc class.
